@@ -25,6 +25,8 @@ import com.google.android.gms.ads.doubleclick.PublisherAdView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
 
@@ -291,7 +293,16 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
             case "smartBanner":
                 return AdSize.SMART_BANNER;
             default:
-                return AdSize.BANNER;
+                Pattern pattern = Pattern.compile("^[0-9]+(x)[0-9]+$");
+                Matcher matcher = pattern.matcher(adSize);
+                boolean matches = matcher.matches();
+                if (matches) {
+                    String[] dimension = adSize.split("x");
+                    AdSize customSize = new AdSize(Integer.parseInt(dimension[0]), Integer.parseInt(dimension[1]));
+                    return customSize;
+                } else {
+                    return AdSize.BANNER;
+                }
         }
     }
 
