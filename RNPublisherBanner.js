@@ -102,7 +102,15 @@ PublisherBanner.propTypes = {
    */
   adUnitID: string,
   
+  /**
+   * DFP targets
+   * */
   targets: string,
+  
+  /**
+   * DFP Target fields
+   * */
+  fields: string,
 
   /**
    * Array of test devices. Use PublisherBanner.simulatorId for the simulator

@@ -38,6 +38,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
 
     protected PublisherAdView adView;
     String[] testDevices;
+    String[] fields;
     AdSize[] validAdSizes;
     String adUnitID;
     AdSize adSize;
@@ -170,21 +171,16 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         PublisherAdRequest adRequest;
 
         if (this.targets != null) {
-
             WritableMap map = JsonUtils.convertJsonToMap(targets);
+            final String[] fields = this.fields;
 
-            // Nomes dos campos a serem enviados para o DFP
-            final String fieldRegiao = "regiao";
-            final String fieldUf = "uf";
-            final String fieldIdCidade = "idCidade";
-            final String fieldAge = "age";
+            Log.i("fabio", fields[0]);
 
-            adRequest = adRequestBuilder
-              .addCustomTargeting(fieldRegiao, map.getString(fieldRegiao))
-              .addCustomTargeting(fieldUf, map.getString(fieldUf))
-              .addCustomTargeting(fieldIdCidade, map.getString(fieldIdCidade))
-              .addCustomTargeting(fieldAge, map.getString(fieldAge))
-              .build();
+            for (int i = 0; i < fields.length; i++) {
+                adRequestBuilder.addCustomTargeting(fields[i], map.getString(fields[i]));
+            }
+
+            adRequest = adRequestBuilder.build();
 
         } else {
             adRequest = adRequestBuilder.build();
@@ -224,6 +220,11 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         this.targets = targets;
     }
 
+    // Atribui os campos a serem enviados para o DFP
+    public void addFields(String[] fields) {
+        this.fields = fields;
+    }
+
     // Manipulado de eventos
     @Override
     public void onAppEvent(String name, String info) {
@@ -239,6 +240,7 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
 
     public static final String REACT_CLASS = "RNDFPBannerView";
     public static final String PROP_AD_SIZE = "adSize";
+    public static final String ADD_FIELDS = "fields";
     public static final String ADD_TARGET = "targets";
     public static final String PROP_VALID_AD_SIZES = "validAdSizes";
     public static final String PROP_AD_UNIT_ID = "adUnitID";
@@ -325,6 +327,12 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
         ReadableNativeArray nativeArray = (ReadableNativeArray)testDevices;
         ArrayList<Object> list = nativeArray.toArrayList();
         view.setTestDevices(list.toArray(new String[list.size()]));
+    }
+
+    // Adiciona os campos a serem enviados para o DPF
+    @ReactProp(name = ADD_FIELDS)
+    public void fields(final ReactPublisherAdView view, final String fields) {
+        view.addFields(fields.split(","));
     }
 
     // Atribui os targets
