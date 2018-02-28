@@ -174,8 +174,6 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             WritableMap map = JsonUtils.convertJsonToMap(targets);
             final String[] fields = this.fields;
 
-            Log.i("fabio", fields[0]);
-
             for (int i = 0; i < fields.length; i++) {
                 adRequestBuilder.addCustomTargeting(fields[i], map.getString(fields[i]));
             }
