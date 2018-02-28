@@ -177,7 +177,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             final String fieldRegiao = "regiao";
             final String fieldUf = "uf";
             final String fieldIdCidade = "idCidade";
-            final Strinf fieldAge = "age";
+            final String fieldAge = "age";
 
             adRequest = adRequestBuilder
               .addCustomTargeting(fieldRegiao, map.getString(fieldRegiao))
