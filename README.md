@@ -47,10 +47,22 @@ import {
 />
 
 // Display a DFP Publisher banner
+
+// Object with targets
+const temp = {age: "25", gender: "male", city: "Rio de Janeiro"};
+
+// String mode of targets
+const targets = JSON.stringify(temp); // "{"age":"25","gender":"male","city":"Rio de Janeiro"}"
+
+// Name of fields that will be sent for DPF
+const fields = Object.keys(temp).join(); // "age,gender,city";
+
 <PublisherBanner
   adSize="fullBanner"
   adUnitID="your-admob-unit-id"
   testDevices={[PublisherBanner.simulatorId]}
+  targets={targets}
+  fields={fields}
   onAdFailedToLoad={error => console.error(error)}
   onAppEvent={event => console.log(event.name, event.info)}
 />

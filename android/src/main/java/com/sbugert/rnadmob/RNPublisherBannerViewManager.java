@@ -2,8 +2,10 @@ package com.sbugert.rnadmob;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
+import com.climatempo.json.utils.JsonUtils;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
@@ -22,26 +24,33 @@ import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+// Cria uma view (Banner)
 class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
 
     protected PublisherAdView adView;
-
     String[] testDevices;
+    String[] fields;
     AdSize[] validAdSizes;
     String adUnitID;
     AdSize adSize;
+    JSONObject targets;
 
+    // Construtor da classe
     public ReactPublisherAdView(final Context context) {
         super(context);
         this.createAdView();
     }
 
+    // Método que cria uma instância da classe
     private void createAdView() {
         if (this.adView != null) this.adView.destroy();
 
@@ -103,6 +112,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         this.addView(this.adView);
     }
 
+    // Evento chamado quando a tela é redimencionada (Alterado a orientação)
     private void sendOnSizeChangeEvent() {
         int width;
         int height;
@@ -121,6 +131,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         sendEvent(RNPublisherBannerViewManager.EVENT_SIZE_CHANGE, event);
     }
 
+    // Envia um evento para o JS
     private void sendEvent(String name, @Nullable WritableMap event) {
         ReactContext reactContext = (ReactContext) getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -129,11 +140,14 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                         event);
     }
 
-    public void loadBanner() {
+    // Faz o carregamendo do banner
+    public void loadBanner() throws JSONException {
         ArrayList<AdSize> adSizes = new ArrayList<AdSize>();
+
         if (this.adSize != null) {
             adSizes.add(this.adSize);
         }
+
         if (this.validAdSizes != null) {
             for (int i = 0; i < this.validAdSizes.length; i++) {
                 adSizes.add(this.validAdSizes[i]);
@@ -153,10 +167,27 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                 adRequestBuilder.addTestDevice(testDevices[i]);
             }
         }
-        PublisherAdRequest adRequest = adRequestBuilder.build();
+
+        PublisherAdRequest adRequest;
+
+        if (this.targets != null) {
+            WritableMap map = JsonUtils.convertJsonToMap(targets);
+            final String[] fields = this.fields;
+
+            for (int i = 0; i < fields.length; i++) {
+                adRequestBuilder.addCustomTargeting(fields[i], map.getString(fields[i]));
+            }
+
+            adRequest = adRequestBuilder.build();
+
+        } else {
+            adRequest = adRequestBuilder.build();
+        }
+
         this.adView.loadAd(adRequest);
     }
 
+    // Atribui um AdUnit
     public void setAdUnitID(String adUnitID) {
         if (this.adUnitID != null) {
             // We can only set adUnitID once, so when it was previously set we have
@@ -167,18 +198,32 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         this.adView.setAdUnitId(adUnitID);
     }
 
+    // Atribui os ids dos dispositivos de teste
     public void setTestDevices(String[] testDevices) {
         this.testDevices = testDevices;
     }
 
+    // Atribui as dimensões do banner
     public void setAdSize(AdSize adSize) {
         this.adSize = adSize;
     }
 
+    // Atribui uma dimensão válida ao banner
     public void setValidAdSizes(AdSize[] adSizes) {
         this.validAdSizes = adSizes;
     }
 
+    // Atribui os targets do banner
+    public void addTargets(JSONObject targets) {
+        this.targets = targets;
+    }
+
+    // Atribui os campos a serem enviados para o DFP
+    public void addFields(String[] fields) {
+        this.fields = fields;
+    }
+
+    // Manipulado de eventos
     @Override
     public void onAppEvent(String name, String info) {
         WritableMap event = Arguments.createMap();
@@ -188,15 +233,16 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
     }
 }
 
+// Gerencia uma view (Banner)
 public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublisherAdView> {
 
     public static final String REACT_CLASS = "RNDFPBannerView";
-
     public static final String PROP_AD_SIZE = "adSize";
+    public static final String ADD_FIELDS = "fields";
+    public static final String ADD_TARGET = "targets";
     public static final String PROP_VALID_AD_SIZES = "validAdSizes";
     public static final String PROP_AD_UNIT_ID = "adUnitID";
     public static final String PROP_TEST_DEVICES = "testDevices";
-
     public static final String EVENT_SIZE_CHANGE = "onSizeChange";
     public static final String EVENT_AD_LOADED = "onAdLoaded";
     public static final String EVENT_AD_FAILED_TO_LOAD = "onAdFailedToLoad";
@@ -204,25 +250,28 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
     public static final String EVENT_AD_CLOSED = "onAdClosed";
     public static final String EVENT_AD_LEFT_APPLICATION = "onAdLeftApplication";
     public static final String EVENT_APP_EVENT = "onAppEvent";
-
     public static final int COMMAND_LOAD_BANNER = 1;
 
+    // Retorna o nome da classe
     @Override
     public String getName() {
         return REACT_CLASS;
     }
 
+    // Cria uma instancia da view
     @Override
     protected ReactPublisherAdView createViewInstance(ThemedReactContext themedReactContext) {
         ReactPublisherAdView adView = new ReactPublisherAdView(themedReactContext);
         return adView;
     }
 
+    // Vincula uma view (lança excessão caso a view for alterada)
     @Override
     public void addView(ReactPublisherAdView parent, View child, int index) {
         throw new RuntimeException("RNPublisherBannerView cannot have subviews");
     }
 
+    // Manipulador de eventos
     @Override
     @Nullable
     public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
@@ -242,12 +291,14 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
         return builder.build();
     }
 
+    // Adiciona tamanho ao banner
     @ReactProp(name = PROP_AD_SIZE)
     public void setPropAdSize(final ReactPublisherAdView view, final String sizeString) {
         AdSize adSize = getAdSizeFromString(sizeString);
         view.setAdSize(adSize);
     }
 
+    // Atribui tamanho válido ao banner
     @ReactProp(name = PROP_VALID_AD_SIZES)
     public void setPropValidAdSizes(final ReactPublisherAdView view, final ReadableArray adSizeStrings) {
         ReadableNativeArray nativeArray = (ReadableNativeArray)adSizeStrings;
@@ -262,11 +313,13 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
         view.setValidAdSizes(adSizes);
     }
 
+    // Atribui AdUnit ao banner
     @ReactProp(name = PROP_AD_UNIT_ID)
     public void setPropAdUnitID(final ReactPublisherAdView view, final String adUnitID) {
         view.setAdUnitID(adUnitID);
     }
 
+    // Adiciona os ids de testes dos dispositivos
     @ReactProp(name = PROP_TEST_DEVICES)
     public void setPropTestDevices(final ReactPublisherAdView view, final ReadableArray testDevices) {
         ReadableNativeArray nativeArray = (ReadableNativeArray)testDevices;
@@ -274,6 +327,20 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
         view.setTestDevices(list.toArray(new String[list.size()]));
     }
 
+    // Adiciona os campos a serem enviados para o DPF
+    @ReactProp(name = ADD_FIELDS)
+    public void fields(final ReactPublisherAdView view, final String fields) {
+        view.addFields(fields.split(","));
+    }
+
+    // Atribui os targets
+    @ReactProp(name = ADD_TARGET)
+    public void addTargets(final ReactPublisherAdView view, final String targets) throws JSONException {
+       JSONObject jsonObj = new JSONObject(targets);
+       view.addTargets(jsonObj);
+    }
+
+    // Recupera o tamanho correto dos bannersT
     private AdSize getAdSizeFromString(String adSize) {
         switch (adSize) {
             case "banner":
@@ -300,12 +367,13 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
                     String[] dimension = adSize.split("x");
                     AdSize customSize = new AdSize(Integer.parseInt(dimension[0]), Integer.parseInt(dimension[1]));
                     return customSize;
-                } else {
-                    return AdSize.BANNER;
                 }
+
+                return AdSize.BANNER;
         }
     }
 
+    // Recupera as contantes da view
     @Nullable
     @Override
     public Map<String, Object> getExportedViewConstants() {
@@ -314,17 +382,23 @@ public class RNPublisherBannerViewManager extends ViewGroupManager<ReactPublishe
         return constants;
     }
 
+    // Recupera os comandos disparados pela view
     @Nullable
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of("loadBanner", COMMAND_LOAD_BANNER);
     }
 
+    // Executa os comandos recupardos da view
     @Override
     public void receiveCommand(ReactPublisherAdView root, int commandId, @javax.annotation.Nullable ReadableArray args) {
         switch (commandId) {
             case COMMAND_LOAD_BANNER:
-                root.loadBanner();
+                try {
+                    root.loadBanner();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }
