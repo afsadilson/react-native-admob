@@ -1,23 +1,54 @@
 {
-  "name": "react-native-admob",
-  "version": "2.0.0-beta.3",
-  "description": "A react-native component for Google AdMob banners and interstitials",
-  "author": "Simon Bugert <simon.bugert@gmail.com>",
-  "main": "index.js",
-  "license": "BSD-2-Clause",
-  "repository": {
+  "_from": "git+https://git@github.com/1fabiopereira/react-native-admob.git",
+  "_id": "react-native-admob@2.0.0-beta.3",
+  "_inBundle": false,
+  "_integrity": "sha1-KPl26VXADrpKmYFSq/GuS7Xc2Bc=",
+  "_location": "/react-native-admob",
+  "_phantomChildren": {},
+  "_requested": {
     "type": "git",
-    "url": "git@github.com:sbugert/react-native-admob.git"
+    "raw": "react-native-admob@git+https://git@github.com/1fabiopereira/react-native-admob.git",
+    "name": "react-native-admob",
+    "escapedName": "react-native-admob",
+    "rawSpec": "git+https://git@github.com/1fabiopereira/react-native-admob.git",
+    "saveSpec": "git+https://git@github.com/1fabiopereira/react-native-admob.git",
+    "fetchSpec": "https://git@github.com/1fabiopereira/react-native-admob.git",
+    "gitCommittish": "master"
   },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+https://git@github.com/1fabiopereira/react-native-admob.git#0db00b373a6df96a74c42ffed733f846f5302ae1",
+  "_spec": "react-native-admob@git+https://git@github.com/1fabiopereira/react-native-admob.git",
+  "_where": "/Users/fabio/Documents/apps/climatempo-lite",
+  "author": {
+    "name": "Simon Bugert",
+    "email": "simon.bugert@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/sbugert/react-native-admob/issues"
+  },
+  "bundleDependencies": false,
   "dependencies": {
     "prop-types": "^15.5.10"
   },
-  "peerDependencies": {
-    "react-native": ">=0.44.0"
-  },
+  "deprecated": false,
+  "description": "A react-native component for Google AdMob banners and interstitials",
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "eslint": "^4.3.0",
     "eslint-plugin-react": "^7.1.0"
-  }
+  },
+  "homepage": "https://github.com/sbugert/react-native-admob#readme",
+  "license": "BSD-2-Clause",
+  "main": "index.js",
+  "name": "react-native-admob",
+  "peerDependencies": {
+    "react-native": ">=0.44.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/sbugert/react-native-admob.git"
+  },
+  "version": "2.0.0-beta.3"
 }
